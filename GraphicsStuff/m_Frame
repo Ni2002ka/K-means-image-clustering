@@ -1,0 +1,19 @@
+package GraphicsStuff;
+
+import javax.swing.JFrame;
+
+public class m_Frame extends JFrame{
+
+	m_Panel panel;
+	public m_Frame() {
+		panel=new m_Panel();
+		
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.add(panel);
+		//why
+		this.pack(); 
+		this.setLocationRelativeTo(null);
+		this.setVisible(true);
+	}
+
+}
