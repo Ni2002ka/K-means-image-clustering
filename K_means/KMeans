@@ -1,0 +1,144 @@
+package K_means;
+
+import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
+
+public class KMeans {
+
+	private int dimensions;
+	private int size;
+	private int [][] inputVectors;
+	private double J_Clust;
+	// # of partitions
+	int k;
+	private int [][] representatives;
+	private ArrayList<Integer>[] partitions;
+	private int[] map;
+	
+	@SuppressWarnings("unchecked")
+	public KMeans(int [][] vectors, int dimensions, int size,int partitionNums) {
+		J_Clust=-100;
+		this.dimensions=dimensions;
+		this.size=size;
+		inputVectors=vectors;
+		k=partitionNums;
+		partitions=new ArrayList[k];
+		for (int i=0;i<k;i++)
+			partitions[i]=new ArrayList<>(0);
+		representatives=new int[k][dimensions];
+		map=new int[size];
+	}
+	
+	//initialize algorithm with random parameters
+	public void init () {
+		//assign random representatives
+//		for (int i=0;i<k;i++) {
+//			representatives[i]=generateRandomVectors(0, 255);
+//		}
+		
+		//assign representatives from existing points  only randomness is when 
+		int inc=size/k;
+		for (int i=0;i<k;i++) {
+			representatives[i]=inputVectors[i*inc];
+		}
+	}
+	
+	public double getJ_Clust() {
+		return J_Clust;
+	}
+	
+	public boolean iterate(double errorMargin) {
+		updatePartitions();
+		updateRepresentatives();
+		
+		return updateJClust(errorMargin);
+	}
+	
+	private boolean updateJClust(double errorMargin) {
+		double newJ_Clust=0;
+		for (int i=0;i<size;i++) {
+			//calculate each factor of the sum
+			newJ_Clust+=Math.pow(getDistance(inputVectors[i], representatives[map[i]]),2);
+		}
+		newJ_Clust/=size;
+		
+		double diff=newJ_Clust-J_Clust;
+		J_Clust=newJ_Clust;
+		
+		return(diff<=errorMargin && diff>=-errorMargin );
+	}
+	
+	private void updateRepresentatives() {
+		for (int j=0;j<k;j++) {
+			int sum[]= new int [dimensions];
+			for (int d=0;d<dimensions;d++)
+				sum[d]=0;
+			
+			ArrayList <Integer> currentPartition=partitions[j];
+			for (int i: currentPartition) {
+				for (int d=0;d<dimensions;d++) {
+					sum[d]+=inputVectors[i][d];
+				}
+			}
+			if (currentPartition.size()!=0) {
+				for (int d=0;d<dimensions;d++)
+					representatives[j][d]=sum[d]/currentPartition.size();
+			}
+			else {
+				representatives[j]=generateRandomVectors(0, 255);
+			}
+			
+		}
+	}
+	
+	private void updatePartitions() {
+//		System.out.println("Updating partitions...");
+		for (int i=0;i<size;i++) {
+			double minDistance=getDistance(inputVectors[i], representatives[0]);
+			int p_num=0;
+			
+			for (int j=1;j<k;j++) {
+				double c_distance=getDistance(inputVectors[i], representatives[j]);
+				if (c_distance<minDistance) {
+					minDistance=c_distance;
+					p_num=j;
+				}
+			}
+//			System.out.println(p_num);
+			partitions[p_num].add(i);
+			map[i]=p_num;
+		}
+	}
+	
+	private double getDistance (int[] v1, int[] v2) {
+		double distance=0;
+		for (int d=0;d<dimensions;d++) {
+			distance+=Math.pow((v1[d]-v2[d]),2);
+		}
+		distance=Math.sqrt(distance);
+		
+		return distance;
+	}
+	
+	private int[] generateRandomVectors(int min, int max) {
+		int[] results=new int[dimensions];
+		for (int i=0;i<dimensions;i++)
+			results[i]=ThreadLocalRandom.current().nextInt(min,max+1);
+		
+		return results;
+		
+	}
+	
+	public int[][] getRepresentatives(){
+		return (representatives);
+	}
+	
+	public int[] getMap() {
+		return map;
+	}
+	
+	public ArrayList<Integer>[] getPartitions(){
+		return partitions;
+	}
+
+}
