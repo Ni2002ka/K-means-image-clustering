@@ -10,11 +10,11 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 //		new m_Frame();
 		int numPartitions=10;
-		File file=new File("src/GraphicsStuff/img1.jpg");
+		File file=new File("src/GraphicsStuff/img1.png");
 		IMG mainIMG=new IMG(file);
 		
 		int colorVectors[][]=mainIMG.getColorVectors();
-		
+		int size=mainIMG.getSize();
 		
 //		for (int i=0;i<2500;i++) {
 ////			System.out.print("a: "); 
@@ -29,12 +29,12 @@ public class Main {
 		
 		//variables to collect results
 		int [][] representatives = new int [numPartitions][4];
-		int[] map=new int[250000];
+		int[] map=new int[size];
 		double minJClust=-1;
 		
 		//we run the algorithm 10 times
 		for (int i=0;i<15;i++) {
-			KMeans algorithm=new KMeans(colorVectors,4, 250000,numPartitions);
+			KMeans algorithm=new KMeans(colorVectors,4, size,numPartitions);
 			algorithm.init();
 			while (!algorithm.iterate(0.0005)) {}
 			//end of algorithm
@@ -48,8 +48,8 @@ public class Main {
 		}
 		
 		
-		int[][] rgbaVectors=convertData(representatives, map,250000);
-		mainIMG.getClusteringResults(mainIMG.rgbaToPixels(rgbaVectors, 250000));
+		int[][] rgbaVectors=convertData(representatives, map,size);
+		mainIMG.getClusteringResults(mainIMG.rgbaToPixels(rgbaVectors, size));
 	}
 
 	public static int[][] convertData (int[][] reps, int[] map, int size) {
